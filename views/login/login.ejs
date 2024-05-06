@@ -1,0 +1,32 @@
+<div class="main">
+    <input type="checkbox" id ="chk" aria-hidden="true">
+ 
+    <div class="signup">
+        <form id="signup-form">
+            <label for="chk" aria-hidden="true">Sign Up</label>
+            <input type="text" name="name" id="name" placeholder="Username" autocomplete="on" required >
+            <input type="email" name="email" id="email" placeholder="Email" autocomplete="on" required>
+            <input type="password" name="password" id="password" placeholder="Password" required>
+            <input type="password" name="confPassword" id="confPassword" placeholder="Konfirmasi Password" required>
+            <select id="jenis_kelamin" name="jenis_kelamin" required>
+                <option value >Jenis Kelamin</option>
+                <option value="laki-laki">Laki-laki</option>
+                <option value="perempuan">Perempuan</option>
+            </select>
+            <input type="text" name="tanggal_lahir" id="tanggal_lahir" placeholder="Tanggal Lahir" required>
+            <input type="text" name="kelas" id="kelas" placeholder="Kelas (VII A, VIII B, IX B)" required>
+            <input type="text" name="alamat" id="alamat" placeholder="Alamat" required>
+            <p id="error-message" style="color: red; display: none;"></p>
+            <button>Sign Up</button>
+        </form>
+    </div>
+
+    <div class="login">
+        <form id="login-form">
+            <label for="chk" aria-hidden="true">Login</label>
+            <input type="email" name="email" id="email-login" placeholder="Email" autocomplete="on" required>
+            <input type="password" name="password" id="password-login" placeholder="Password" required>
+            <button>Login</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,97 @@
+-- public.konselor definition
+
+-- Drop table
+
+-- DROP TABLE public.konselor;
+
+CREATE TABLE public.konselor (
+	id serial4 NOT NULL,
+	nama varchar(100) NOT NULL,
+	email varchar(100) NOT NULL,
+	bidang varchar(100) NOT NULL,
+	nomor_telepon varchar(20) NULL,
+	alamat varchar(255) NULL,
+	status_aktif bool DEFAULT true NULL,
+	CONSTRAINT konselor_email_key UNIQUE (email),
+	CONSTRAINT konselor_pkey PRIMARY KEY (id)
+);
+
+
+-- public.users definition
+
+-- Drop table
+
+-- DROP TABLE public.users;
+
+CREATE TABLE public.users (
+	id serial4 NOT NULL,
+	"name" varchar(255) NULL,
+	email varchar(255) NULL,
+	"password" varchar(255) NULL,
+	refresh_token varchar(255) NULL,
+	"role" public."enum_users_role" DEFAULT 'siswa'::enum_users_role NOT NULL,
+	"createdAt" timestamptz NOT NULL,
+	"updatedAt" timestamptz NOT NULL,
+	CONSTRAINT users_pkey PRIMARY KEY (id)
+);
+
+
+-- public.students definition
+
+-- Drop table
+
+-- DROP TABLE public.students;
+
+CREATE TABLE public.students (
+	id serial4 NOT NULL,
+	user_id int4 NOT NULL,
+	"name" varchar(255) NULL,
+	jenis_kelamin public."jenis_kelamin_enum" NULL,
+	tanggal_lahir date NULL,
+	kelas varchar(20) NULL,
+	alamat varchar(255) NULL,
+	CONSTRAINT students_pkey PRIMARY KEY (id),
+	CONSTRAINT students_user_id_key UNIQUE (user_id),
+	CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE,
+	CONSTRAINT fk_user_id_cascade FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
+);
+
+
+-- public.konseling definition
+
+-- Drop table
+
+-- DROP TABLE public.konseling;
+
+CREATE TABLE public.konseling (
+	id serial4 NOT NULL,
+	student_id int4 NULL,
+	konselor_id int4 NULL,
+	judul varchar(255) NULL,
+	deskripsi text NULL,
+	status varchar(50) NULL,
+	requested_date timestamp NULL,
+	scheduled_date timestamp NULL,
+	CONSTRAINT konseling_pkey PRIMARY KEY (id),
+	CONSTRAINT konseling_konselor_id_fkey FOREIGN KEY (konselor_id) REFERENCES public.konselor(id),
+	CONSTRAINT konseling_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE
+);
+
+
+-- public.pelanggaran definition
+
+-- Drop table
+
+-- DROP TABLE public.pelanggaran;
+
+CREATE TABLE public.pelanggaran (
+	id serial4 NOT NULL,
+	student_id int4 NOT NULL,
+	kelas varchar(20) NOT NULL,
+	pelanggaran varchar(255) NOT NULL,
+	poin int4 NOT NULL,
+	deskripsi text NULL,
+	prosedur_konseling text NULL,
+	CONSTRAINT pelanggaran_pkey PRIMARY KEY (id),
+	CONSTRAINT pelanggaran_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE
+);

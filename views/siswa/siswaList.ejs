@@ -1,0 +1,153 @@
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+      <div class="container-fluid">
+          <div class="row mb-2">
+              <div class="col-sm-6">
+                  <h1 class="m-0"><%- title %></h1>
+              </div><!-- /.col -->
+          </div>
+      </div>
+  </div>
+  <style media="screen">
+    th {
+        text-align: center;
+    }
+    .button-group {
+        text-align: center;
+    }
+    td {
+        text-transform: capitalize;
+    }
+  </style>
+  
+  <!-- Main content -->
+  <section class="content">
+      <div class="container-fluid">
+          <div class="row">
+              <div class="col-12">
+                  <div class="card">
+                      
+                      <!-- /.card-header -->
+                      <div class="card-body">
+                          <table id="example2" class="table table-bordered table-striped">
+                              <thead>
+                                  <tr>
+                                      <th class="all">No</th>
+                                      <th class="all">Nama</th>
+                                      <th class="desktop">Tanggal Lahir</th>
+                                      <th class="desktop">Jenis Kelamin</th>
+                                      <th>Kelas</th>
+                                      <th>Alamat</th>
+                                      <th>Aksi</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                <% students.forEach((student, index) => { %>
+                                    <tr data-student-id="<%= student.id %>">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= student.name %></td>
+                                        <td><%= student.tanggal_lahir %></td>
+                                        <td><%= student.jenis_kelamin %></td>
+                                        <td><%= student.kelas %></td>
+                                        <td><%= student.alamat %></td>
+                                        <td>
+                                            <div class="button-group">
+                                                <button type="submit" name="submit" value="Update Siswa" class="btn btn-warning btn-edit" data-student-id="<%= student.id %>">
+                                                    <i class="fa fa-pen"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-delete">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                                
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+</div>
+
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<!-- Delete script -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const deleteButtons = document.querySelectorAll('.btn-delete');
+
+      deleteButtons.forEach(button => {
+          button.addEventListener('click', async () => {
+              const row = button.closest('tr');
+              const studentId = row.dataset.studentId;
+
+              // Menampilkan peringatan konfirmasi
+              Swal.fire({
+                  title: 'Apakah Anda yakin?',
+                  text: "Data siswa akan dihapus secara permanen!",
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#3085d6',
+                  cancelButtonColor: '#d33',
+                  confirmButtonText: 'Ya, hapus!',
+                  cancelButtonText: 'Batal'
+              }).then(async (result) => {
+                  if (result.isConfirmed) {
+                      try {
+                          // Mengirim permintaan DELETE ke server
+                          const response = await fetch(`/students/${studentId}`, {
+                              method: 'DELETE'
+                          });
+
+                          if (!response.ok) {
+                              throw new Error('Failed to delete student');
+                          }
+
+                          // Menghapus baris dari tabel jika penghapusan berhasil
+                          row.remove();
+
+                          // Menampilkan pemberitahuan sukses
+                          Swal.fire(
+                              'Terhapus!',
+                              'Data siswa berhasil dihapus.',
+                              'success'
+                          );
+                      } catch (error) {
+                          console.error('Error deleting student:', error.message);
+                          // Menampilkan pemberitahuan kesalahan
+                          Swal.fire(
+                              'Error!',
+                              'Terjadi kesalahan saat menghapus data siswa.',
+                              'error'
+                          );
+                      }
+                  }
+              });
+          });
+      });
+  });
+
+// Function klik tombol edit
+document.addEventListener('DOMContentLoaded', () => {
+      const editButtons = document.querySelectorAll('.btn-edit');
+
+      editButtons.forEach(button => {
+          button.addEventListener('click', () => {
+              const studentId = button.dataset.studentId;
+
+              // Arahkan ke halaman edit dengan ID siswa
+              window.location.href = `/dashboard/admin/students/edit/${studentId}`;
+          });
+      });
+  });
+</script>
+
+
+   

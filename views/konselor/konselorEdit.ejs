@@ -1,0 +1,67 @@
+<!-- Main content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0"><%- title %></h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Formulir Edit Konselor</h3>
+                        </div>
+                        <div class="card-body">
+                            <form role="form" id="myForm" data-toggle="validator" action="/dashboard/admin/data-konselor/edit/<%= konselor.id %>" method="POST">
+                                <div class="form-group">
+                                    <label for="nama" class="control-label">Nama Konselor</label>
+                                    <input type="text" class="form-control" name="nama" id="nama" placeholder="Nama Konselor" value="<%= konselor.nama %>" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="email" class="control-label">Email</label>
+                                    <input type="text" class="form-control" name="email" id="email" placeholder="Email" value="<%= konselor.email %>" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="bidang" class="control-label">Bidang</label>
+                                    <input type="text" class="form-control" name="bidang" id="bidang" placeholder="Bidang" value="<%= konselor.bidang %>" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="nomor_telepon" class="control-label">Nomor Telepon</label>
+                                    <input type="text" class="form-control" name="nomor_telepon" id="nomor_telepon" placeholder="Nomor Telepon" value="<%= konselor.nomor_telepon %>" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="alamat" class="control-label">Alamat</label>
+                                    <input type="text" class="form-control" name="alamat" id="alamat" placeholder="Alamat" value="<%= konselor.alamat %>" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="status_aktif" class="control-label">Status</label>
+                                    <select id="status_aktif" class="form-control" name="status_aktif" required>
+                                      <option value="Aktif" <%= konselor.status_aktif ? 'selected' : '' %>>Aktif</option>
+                                      <option value="Tidak Aktif" <%= !konselor.status_aktif ? 'selected' : '' %>>Tidak Aktif</option>
+                                    </select>
+                                  </div>
+                                  
+                                
+                                
+                                <!-- Form Actions -->
+                                <div class="box-footer">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <a href="/dashboard/admin/data-konselor" class="btn btn-default">Cancel</a>
+                                </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+    </section>
+</div>
+
