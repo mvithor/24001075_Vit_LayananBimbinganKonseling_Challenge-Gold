@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const Users = require('../model/userModel');
+const pool = require('../config/connection');
+const { updateRefreshToken } = require('../model/userModel');
 
 const protectDashboard = async (req, res, next) => {
   // Mendapatkan token akses dari cookie
@@ -55,9 +56,8 @@ const protectDashboard = async (req, res, next) => {
     });
 
     // Simpan kembali refresh token ke database
-    await Users.update({ refresh_token: refreshToken }, {
-      where: { id: userId }
-    });
+    await pool.query(updateRefreshToken, [refreshToken, userId]);
+
 
     // Lanjutkan ke middleware selanjutnya dengan access token yang diperbarui
     req.accessToken = newAccessToken;

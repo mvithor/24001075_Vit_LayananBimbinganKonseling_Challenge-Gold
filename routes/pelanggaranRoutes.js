@@ -3,7 +3,7 @@ const { getPelanggaran, addPelanggaran, getPelanggaranById, deletePelanggaran, u
 const protectDashboard = require('../middleware/protectDashboard');
 const router = Router();
 
-router.get('/', protectDashboard, getPelanggaran);
+router.get('/', getPelanggaran);
 router.get('/tambah-pelanggaran', protectDashboard, From );
 router.post('/tambah-pelanggaran', protectDashboard, addPelanggaran);
 router.get('/:id', protectDashboard, getPelanggaranById);

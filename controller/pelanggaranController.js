@@ -7,8 +7,9 @@ const getStudentById = 'SELECT name FROM students WHERE id = $1';
 const getPelanggaran = async (req, res) => {
     try {
         // Dapatkan data siswa
-        const students = await pool.query(getStudents);
-        
+        const studentsResult = await pool.query(getStudents);
+        const students = studentsResult.rows;
+
         // Dapatkan data pelanggaran
         const result = await pool.query(queries.getPelanggaran);
         const dataPelanggaran = result.rows;
@@ -19,18 +20,17 @@ const getPelanggaran = async (req, res) => {
             pelanggaran.student_name = studentResult.rows[0].name;
         }
 
-        // Render template dengan menyertakan data pelanggaran dan siswa
-        res.render('pelanggaran/pelanggaranList', {
+        // Kirim data pelanggaran dan siswa dalam JSON
+        res.json({
             pelanggaran: dataPelanggaran, 
-            students: students.rows,
-            layout: 'layouts/pelanggaran-layout',
-            title: 'Data Pelanggaran'
+            students: students,
         });
     } catch (error) {
         console.error('Terjadi kesalahan saat mengambil data pelanggaran', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ msg: 'Internal Server Error' });
     }
 };
+
 // Dapatkan data pelanggaran berdasarkan ID
 const getPelanggaranById = async (req, res) => {
     try {

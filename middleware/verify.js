@@ -1,22 +1,15 @@
-const isLogin = (req,res, next) => {
-    if(req.session.loggedin === true){
-        next();
-        return;
-    } else {
-        req.session.destroy( (err) =>{
-            res.redirect('/auth');
-        })
-    }
-}
-const isLogout = (req, res, next) => {
-    if(req.session.loggedin !== true) {
-        next();
-        return;
-    }
-    res.redirect('/');
-}
+const jwt = require('jsonwebtoken')
 
-module.exports = {
-    isLogin,
-    isLogout
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if(token == null) return res.sendStatus(401);
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) return res.sendStatus(403);
+        req.email = decoded.email
+        next();
+    })
+}
+module.exports ={
+    verifyToken
 }

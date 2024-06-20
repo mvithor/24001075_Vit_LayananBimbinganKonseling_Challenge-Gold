@@ -3,11 +3,11 @@ const { getKonselor, addKonselor, getKonselorById, deleteKonselor, updateKonselo
 const  protectDashboard  =require('../middleware/protectDashboard')
 const router = Router();
 
-router.get('/',protectDashboard, getKonselor);
+router.get('/', getKonselor);
 router.get('/tambah-konselor', protectDashboard, From)
 router.post('/tambah-konselor', protectDashboard, addKonselor);
-router.get('/:id',protectDashboard, getKonselorById);
+router.get('/:id',getKonselorById);
 router.delete('/:id', protectDashboard, deleteKonselor)
-router.put('/:id', protectDashboard, updateKonselor)
+router.put('/:id', updateKonselor)
 
 module.exports = router;

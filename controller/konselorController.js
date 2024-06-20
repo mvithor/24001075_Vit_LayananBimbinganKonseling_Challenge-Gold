@@ -6,28 +6,20 @@ const getKonselor = async (req, res) => {
   try {
       const result = await pool.query(queries.getKonselor);
       const konselor = result.rows;
-      res.render('konselor/konselorList', {
-        konselor,
-        layout : 'layouts/konselor-layout',
-        title  : 'Data Konselor' 
-      })
+      res.json(konselor);
   } catch (error) {
       console.error('Terjadi kesalahan saat mengambil data konselor', error);
       res.status(500).send('Internal Server Error');
-  };
+  }
 };
+
 // Dapatkan data konselor berdasarkan ID
 const getKonselorById = async (req, res) => {
     try {
       const id = req.params.id;
       const result = await pool.query(queries.getKonselorById, [id]);
       const konselor = result.rows[0];
-
-      res.render('konselor/konselorEdit', {
-        konselor,
-        layout : 'layouts/konselor-layout',
-        title  : 'Edit Konselor'
-      })
+      res.json(konselor);
 
     } catch (error) {
         console.error('Terjadi kesalahan saat mendapatkan data konselor');
@@ -37,35 +29,35 @@ const getKonselorById = async (req, res) => {
 // Tambahkan Data Konselor 
 const addKonselor = async (req, res) => {
   try {
-      const { nama, email, bidang, nomor_telepon, alamat, status_aktif } = req.body;
+    const { nama, email, bidang, nomor_telepon, alamat, status_aktif } = req.body;
 
-      // Validasi data
-      if (!nama || !email || !bidang || !nomor_telepon || !alamat  || !status_aktif) {
-          return res.status(400).send("Data konselor tidak lengkap");
-      };
+    // Validasi data
+    if (!nama || !email || !bidang || !nomor_telepon || !alamat || !status_aktif) {
+      return res.status(400).json({ msg: "Data konselor tidak lengkap" });
+    }
 
-      // Tambahkan data konselor
-        await pool.query(queries.addKonselor, [
-          nama,
-          email,
-          bidang,
-          nomor_telepon,
-          alamat,
-          status_aktif,
-      ]);
+    // Tambahkan data konselor
+    await pool.query(queries.addKonselor, [
+      nama,
+      email,
+      bidang,
+      nomor_telepon,
+      alamat,
+      status_aktif,
+    ]);
 
-      // Redirect ke halaman data-konselor
-      res.redirect('/dashboard/admin/data-konselor')
+    res.status(201).json({ msg: "Konselor berhasil ditambahkan" });
   } catch (error) {
-      // Handling error berdasarkan jenis error (unique constraint violation)
-      if (error.code === '23505') {
-          res.status(400).send('Email sudah terdaftar');
-      } else {
-          console.error('Terjadi kesalahan saat menambahkan konselor:', error);
-          res.status(500).send('Internal Server Error');
-      };
-  };
+    // Handling error berdasarkan jenis error (unique constraint violation)
+    if (error.code === '23505') {
+      res.status(400).json({ msg: 'Email sudah terdaftar' });
+    } else {
+      console.error('Terjadi kesalahan saat menambahkan konselor:', error);
+      res.status(500).json({ msg: 'Internal Server Error' });
+    }
+  }
 };
+
 // Hapus data Konselor
 const deleteKonselor = async (req, res) => {
   try {

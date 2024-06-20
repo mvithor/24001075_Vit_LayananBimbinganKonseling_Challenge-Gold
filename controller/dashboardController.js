@@ -6,8 +6,8 @@ const queriesPelanggaran = require('../model/pelanggaranModel')
 //Function dashboard Admin
 const dashboardAdmin = async (req, res) => {
     try {
-        // Dapatkan username login
-        const userName = req.userName;
+        // // Dapatkan username login
+        // const userName = req.userName;
 
         // Query jumlah siswa
         const resultStudents = await pool.query(queriesSiswa.getStudentsAll);

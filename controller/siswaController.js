@@ -10,20 +10,30 @@ const getStudents = async (req, res) => {
         students = students.map(student => {
             return {
                 ...student,
-                tanggal_lahir: moment(student.tanggal_lahir).format('YYYY-MM-DD')
+                tanggal_lahir: moment(student.tanggal_lahir).format('YYYY-MM-DD'),
+             
             };
         });
-        res.render('siswa/siswaList', { 
-            students,
-            layout : 'layouts/data-layout',
-            title  : 'Data Siswa' 
-        }); 
+        res.json(students)
     
     } catch (error) {
         console.error('Terjadi kesalahan saat mengambil data siswa:', error);
-        res.status(500).send('Internal server error');
+        res.status(500).send({msg:'Internal server error'});
     };
 };
+
+// Dapatkan Data siswa berdasarkan Jenis Kelamin
+const getJenisKelamin = async (req, res) => {
+    try {
+        const result = await pool.query('SELECT DISTINCT jenis_kelamin FROM students');
+        const genderOptions = result.rows.map(row => ({ value: row.jenis_kelamin, label: row.jenis_kelamin }));
+        res.json(genderOptions);
+    } catch (error) {
+        console.error('Error fetching gender options:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 
 // Dapatkan data siswa berdasarkan ID
 const getStudentsById = async (req, res) => {
@@ -31,15 +41,10 @@ const getStudentsById = async (req, res) => {
       const id = req.params.id;
       const result = await pool.query(queries.getStudentsById, [id]);
       const student = result.rows[0];
-  
-      res.render('siswa/siswaEdit', {
-        student,
-        layout: 'layouts/data-layout',
-        title: 'Edit Siswa'
-      });
+      res.json(student);
     } catch (error) { 
       console.error("Terjadi kesalahan saat mendapatkan data siswa berdasarkan ID:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+      res.status(500).json({ msg: "Internal Server Error" });
     }
    
   };
@@ -59,10 +64,10 @@ const updateStudent = async (req, res) => {
             alamat, 
             id
         ]);
-        return res.redirect('/dashboard/admin/students')
+        return res.json({ msg: 'Data siswa berhasil diperbarui' });
     } catch (error) {
         console.error('Terjadi kesalahan saat mengupdate data siswa', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ msg: 'Internal Server Error' });
     }
 }
 
@@ -97,6 +102,7 @@ const deleteAllStudent = async (req, res) => {
 
 module.exports = {
     getStudents,
+    getJenisKelamin,
     getStudentsById,
     deleteStudent,
     deleteAllStudent,

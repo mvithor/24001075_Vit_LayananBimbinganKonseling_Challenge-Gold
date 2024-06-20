@@ -19,12 +19,12 @@ const layanan = async (req, res) => {
     })
 }
 
-const konselor = async (req, res) => {
-    await res.render('konselor', {
-        layout : 'layouts/main-layout',
-        title  : 'Konselor'
-    })
-}
+// const konselor = async (req, res) => {
+//     await res.render('konselor', {
+//         layout : 'layouts/main-layout',
+//         title  : 'Konselor'
+//     })
+// }
 
 const literasi = async (req, res) => {
     await res.render('literasi', {
@@ -37,6 +37,6 @@ module.exports = {
     beranda,
     tentang,
     layanan,
-    konselor,
+  
     literasi,
 }
