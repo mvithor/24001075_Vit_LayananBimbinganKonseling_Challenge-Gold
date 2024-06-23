@@ -7,10 +7,10 @@ const {
     inputPelanggaran
 } = require('../controller/adminPelanggaranController');
 //Routing
-router.get('/api/v1/pelanggaran',getPelanggaran);
-router.post('/pelanggaran',inputPelanggaran);
-router.put('/pelanggaran/:id',updatePelanggaranById);
-router.delete('/pelanggaran/:id',deletePelanggaranById);
+router.get('/api/pelanggaran',getPelanggaran);
+router.post('/api/pelanggaran',inputPelanggaran);
+router.put('/api/pelanggaran/:id',updatePelanggaranById);
+router.delete('/api/pelanggaran/:id',deletePelanggaranById);
 
 
 module.exports = router;
