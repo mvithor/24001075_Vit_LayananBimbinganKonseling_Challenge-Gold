@@ -95,3 +95,27 @@ CREATE TABLE public.pelanggaran (
 	CONSTRAINT pelanggaran_pkey PRIMARY KEY (id),
 	CONSTRAINT pelanggaran_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE
 );
+
+-- public.kelas definition
+
+-- Drop table
+
+-- DROP TABLE public.kelas;
+
+CREATE TABLE public.kelas (
+	id serial4 NOT NULL,
+	nama_kelas varchar(50) NOT NULL,
+	CONSTRAINT kelas_pkey PRIMARY KEY (id)
+);
+
+-- public.gender definition
+
+-- Drop table
+
+-- DROP TABLE public.gender;
+
+CREATE TABLE public.gender (
+	id serial4 NOT NULL,
+	jenis_kelamin varchar(20) NOT NULL,
+	CONSTRAINT gender_pkey PRIMARY KEY (id)
+);
