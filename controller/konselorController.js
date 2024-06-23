@@ -13,6 +13,18 @@ const getKonselor = async (req, res) => {
   }
 };
 
+// Dapatkan jumlah data konselor
+const getKonselorAll = async (req, res) => {
+  try {
+    const result = await pool.query(queries.getKonselorAll);
+    const count = result.rows[0].count;
+    res.json({count})
+  } catch (error) {
+    console.error('Terjadi kesalahan saat mengambil jumlah konselor', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 // Dapatkan data konselor berdasarkan ID
 const getKonselorById = async (req, res) => {
     try {
@@ -20,7 +32,6 @@ const getKonselorById = async (req, res) => {
       const result = await pool.query(queries.getKonselorById, [id]);
       const konselor = result.rows[0];
       res.json(konselor);
-
     } catch (error) {
         console.error('Terjadi kesalahan saat mendapatkan data konselor');
         res.status(500).send('Internal Server Error');
@@ -62,12 +73,12 @@ const addKonselor = async (req, res) => {
 const deleteKonselor = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const result = await pool.query(queries.deleteKonselor, [id]);
-
-    if (result.rowCount === 0) {
-        return res.status(404).send("Konselor tidak terdaftar");
-    };
-        res.status(200).send("Konselor berhasil dihapus")
+    const checkKonselorTerdaftar = await pool.query(queries.getKonselorById, [id]);
+    if (checkKonselorTerdaftar.rows.length === 0) {
+      return res.status(404).json({ msg: " Konselor tidak ditemukan"})
+    }
+    await pool.query(queries.deleteKonselor, [id]);
+    res.status(200).send("Konselor berhasil dihapus")
     
   } catch (error) {
     console.error('Terjadi kesalahan saat menghapus konselor:', error);
@@ -103,22 +114,14 @@ const updateKonselor = async (req, res) => {
   } catch (error) {
       console.error('Terjadi kesalahan saat mengupdate data konselor', error);
       res.status(500).send('Internal Server Error');
-  }
-}
-
-const From = (req, res) => {
-    res.render('konselor/konselorAdd', {
-        layout : 'layouts/konselor-add',
-        title  : "Tambah Konselor"
-    })
-}
-        
- 
+  };
+};
+         
 module.exports = {
     getKonselor,
+    getKonselorAll,
     getKonselorById,
     addKonselor,
     deleteKonselor,
     updateKonselor,
-    From
 }
