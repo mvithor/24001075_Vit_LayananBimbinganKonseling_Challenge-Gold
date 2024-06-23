@@ -25,6 +25,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const pelanggaranRoutes = require('./routes/pelanggaranRoutes');
 const konselingRoutes = require('./routes/konselingRoutes');
 const usersRoutes = require('./routes/usersRoutes');
+const adminPelanggaranRoutes = require('./routes/adminPelanggaranRoutes')
 
 // Inisialisasi EJS dan Ejs Layout
 app.set('view engine', 'ejs');
@@ -66,10 +67,11 @@ app.use('/pelanggaran', pelanggaranRoutes);
 app.use('/konseling', konselingRoutes);
 app.use('/auth', loginRoutes);
 app.use('/users', usersRoutes);
+app.use('/admin', adminPelanggaranRoutes)
 
 // Run Servers
 app.listen(PORT, () => {
-  console.log(`Server berjalan di localhost: ${PORT}`);
+  console.log(`Server berjalan di http://localhost:${PORT}`);
 });
 
 // Run Database
