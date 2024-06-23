@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { getUsers, form, Register, Login,  Logout}  = require('../controller/Users');
+const { getUsers, Register, Login,  Logout}  = require('../controller/Users');
 const { verifyToken } = require('../middleware/verify')
 const  refreshToken  = require('../controller/refreshToken')
 
@@ -7,12 +7,9 @@ const  refreshToken  = require('../controller/refreshToken')
 const router = Router();
 
 
-// Route Get Halaman Login dan signUp
-router.get('/', form);
+
 
 router.get('/token', refreshToken)
-
-
 router.get('/logout', Logout)
 router.post('/register', Register);
 
