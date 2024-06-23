@@ -16,7 +16,6 @@ CREATE TABLE public.konselor (
 	CONSTRAINT konselor_pkey PRIMARY KEY (id)
 );
 
-
 -- public.users definition
 
 -- Drop table
@@ -30,11 +29,10 @@ CREATE TABLE public.users (
 	"password" varchar(255) NULL,
 	refresh_token varchar(255) NULL,
 	"role" public."enum_users_role" DEFAULT 'siswa'::enum_users_role NOT NULL,
-	"createdAt" timestamptz NOT NULL,
-	"updatedAt" timestamptz NOT NULL,
+	updated_at timestamp DEFAULT now() NULL,
+	created_at timestamp DEFAULT now() NULL,
 	CONSTRAINT users_pkey PRIMARY KEY (id)
 );
-
 
 -- public.students definition
 
@@ -46,15 +44,21 @@ CREATE TABLE public.students (
 	id serial4 NOT NULL,
 	user_id int4 NOT NULL,
 	"name" varchar(255) NULL,
-	jenis_kelamin public."jenis_kelamin_enum" NULL,
 	tanggal_lahir date NULL,
-	kelas varchar(20) NULL,
 	alamat varchar(255) NULL,
+	jenis_kelamin_id int4 NULL,
+	kelas_id int4 NULL,
 	CONSTRAINT students_pkey PRIMARY KEY (id),
-	CONSTRAINT students_user_id_key UNIQUE (user_id),
-	CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE,
-	CONSTRAINT fk_user_id_cascade FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
+	CONSTRAINT students_user_id_key UNIQUE (user_id)
 );
+
+
+-- public.students foreign keys
+
+ALTER TABLE public.students ADD CONSTRAINT fk_jenis_kelamin FOREIGN KEY (jenis_kelamin_id) REFERENCES public.gender(id);
+ALTER TABLE public.students ADD CONSTRAINT fk_kelas_id FOREIGN KEY (kelas_id) REFERENCES public.kelas(id);
+ALTER TABLE public.students ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+ALTER TABLE public.students ADD CONSTRAINT fk_user_id_cascade FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 -- public.konseling definition
