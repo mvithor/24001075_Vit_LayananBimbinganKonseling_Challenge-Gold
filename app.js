@@ -16,6 +16,7 @@ const pool = require('./config/connection');
 
 // Import Routing
 const studentRoutes = require('./routes/siswaRoutes');
+const kelasRoutes = require('./routes/kelasRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const homeRoutes = require('./routes/homeRoutes');
 const loginRoutes = require('./routes/login');
@@ -56,6 +57,7 @@ app.get('/public/script.js', (req, res) => {
 
 // Routing
 app.use('/', homeRoutes);
+app.use('/kelas', kelasRoutes);
 app.use('/profile', profileRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/students', studentRoutes);
