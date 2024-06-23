@@ -1,11 +1,14 @@
 const pool = require('../config/connection');
 const queriesUser = require('../model/userModel');
 const { getUserByEmail,
+        getGender,
+        getGenderForm,
         getUserByRefreshToken,
         updateRefreshToken,
         deleteRefreshToken,
       } = require('../model/userModel')
 const queriesSiswa = require('../model/siswaModel');
+const queriesKelas = require('../model/kelasModel')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -38,6 +41,18 @@ const getUsersById = async (req, res) => {
        res.status(500).json('Internal Server Error') 
     }
 }
+// Dapatkan data jenis kelamin
+const getJenisKelamin = async (req, res) => {
+  try {
+      const {rows} = await pool.query(getGenderForm);
+      console.log(rows); // Periksa data yang dikembalikan untuk memastikan strukturnya
+      res.status(200).json(rows)
+  } catch (error) {
+      console.error("Error fetching gender options:", error);
+      res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
 // Function hapus user
 const deleteUsers = async (req, res) => {
     try {
@@ -59,61 +74,141 @@ const deleteUsers = async (req, res) => {
   };
 
 // Function Register
-  const Register = async (req, res) => {
-    // Mengambil data dari body request
-    const { name, email, password, confPassword, jenis_kelamin, tanggal_lahir, kelas, alamat } = req.body;
-    console.log(req.body)
-    // Konfirmasi password
-    if (password !== confPassword)
-        return res.status(400).json({ msg: "Password Tidak Sama" });
-    
-    const userResult = await pool.query(getUserByEmail, [email]); 
-    if (userResult.rows.length > 0) {
-      return res.status(400).json({ msg: "Email sudah terdaftar" });
+const Register = async (req, res) => {
+  const { name, email, password, confPassword, jenis_kelamin_id, tanggal_lahir, kelas_id, alamat } = req.body;
+
+  if (password !== confPassword) {
+    return res.status(400).json({ msg: "Password Tidak Sama" });
   }
 
+  try {
+    console.log("Mengecek apakah email sudah terdaftar...");
+    const userResult = await pool.query(queriesUser.getUserByEmail, [email]);
+    if (userResult.rows.length > 0) {
+      return res.status(400).json({ msg: "Email sudah terdaftar" });
+    }
+
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashPassword = await bcrypt.hash(password, salt);
+
+    const client = await pool.connect();
     try {
-        // Salt acak dan hash + password asli
-        const saltRounds = 10; 
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashPassword = await bcrypt.hash(password, salt);
+      await client.query('BEGIN');
 
-        // Dapatkan tanggal saat ini untuk createdAt dan updatedAt
-        const now = new Date();
+      console.log("Menambahkan pengguna baru...");
+      const addUserValues = [name, email, hashPassword, null, 'siswa'];
+      console.log("addUserValues:", addUserValues);
+      const newUserResult = await client.query(queriesUser.addUser, addUserValues);
+      const newUserId = newUserResult.rows[0].id;
 
-        // Memulai Transaksi
-        const client = await pool.connect();
-        try {
-          await client.query('BEGIN');
+      console.log("Mengambil ID jenis kelamin...");
+      console.log("jenis_kelamin_id yang diterima dari frontend:", jenis_kelamin_id);
+      const genderResult = await client.query(getGender, [jenis_kelamin_id]);
+      console.log("genderResult:", genderResult.rows);
+      if (genderResult.rows.length === 0) {
+        throw new Error("Invalid gender type");
+      }
+      const genderId = genderResult.rows[0].id;
 
-          // Menambahkan pengguna baru ke tabel users
-          const addUserValues = [name, email, hashPassword, null, 'siswa', new Date(), new Date()];
-          const userResult = await client.query(queriesUser.addUser, addUserValues);
-          const newUserId = userResult.rows[0].id;
+      console.log("Validasi kelas ID...");
+      const kelasResult = await client.query(queriesKelas.getKelasForm, [kelas_id]);
+      console.log("kelasResult:", kelasResult.rows);
+      if (kelasResult.rows.length === 0) {
+        throw new Error("Invalid class ID");
+      }
+      const kelasId = kelasResult.rows[0].id;
 
-          // Menambahkan entri baru ke tabel students
-          const addStudentValues = [newUserId, name, jenis_kelamin, tanggal_lahir, kelas, alamat];
-          await client.query (queriesSiswa.addStudent, addStudentValues);
+      console.log("Jenis kelamin ID:", genderId);
+      console.log("Kelas ID:", kelasId);
+      console.log("Menambahkan siswa baru...");
+      const addStudentValues = [newUserId, name, genderId, tanggal_lahir, kelasId, alamat];
+      console.log("addStudentValues:", addStudentValues);
+      await client.query(queriesSiswa.addStudent, addStudentValues);
 
-          // Commite Transaksi
-          await client.query ('COMMIT');
+      await client.query('COMMIT');
 
-          // Kirim respons ke klien
-          res.status(201).json({ msg: "Registrasi berhasil" });
-        } catch (error) {
-          // Rollback transaksi jika terjadi kesalahan
-          await client.query('ROLLBACK');
-          console.error('Terjadi kesalahan saat melakukan register', error);
-          res.status(500).json({ msg: "Internal Server Error" });
-        } finally {
-          client.release();
-    }
-        
+      res.status(201).json({ msg: "Registrasi berhasil" });
     } catch (error) {
-        console.error('Terjadi kesalahan saat melakukan register', error);
-        res.status(500).json({ msg: "Internal Server Error" });
+      await client.query('ROLLBACK');
+      console.error('Terjadi kesalahan saat melakukan register:', error);
+      res.status(500).json({ msg: "Internal Server Error" });
+    } finally {
+      client.release();
     }
+  } catch (error) {
+    console.error('Terjadi kesalahan saat melakukan register:', error);
+    res.status(500).json({ msg: "Internal Server Error" });
+  }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+// const Register = async (req, res) => {
+//   const { name, email, password, confPassword, jenis_kelamin, tanggal_lahir, kelas, alamat } = req.body;
+  
+//   if (password !== confPassword)
+//       return res.status(400).json({ msg: "Password Tidak Sama" });
+  
+//   const userResult = await pool.query(getUserByEmail, [email]); 
+//   if (userResult.rows.length > 0) {
+//       return res.status(400).json({ msg: "Email sudah terdaftar" });
+//   }
+
+//   try {
+//       const saltRounds = 10; 
+//       const salt = await bcrypt.genSalt(saltRounds);
+//       const hashPassword = await bcrypt.hash(password, salt);
+
+//       const client = await pool.connect();
+//       try {
+//           await client.query('BEGIN');
+
+//           const addUserValues = [name, email, hashPassword, null, 'siswa'];
+//           const userResult = await client.query(queriesUser.addUser, addUserValues);
+//           const newUserId = userResult.rows[0].id;
+
+//           // Ambil ID jenis kelamin dari tabel gender
+//           const genderResult = await client.query(queriesUser.getJenisKelamin, [jenis_kelamin]);
+//           if (genderResult.rows.length === 0) {
+//               throw new Error("Invalid gender type");
+//           }
+//           const jenis_kelamin_id = genderResult.rows[0].id;
+
+//           //Validasi kelas ID
+//           const kelasResult = await client.query(queriesUser.getKelas, [kelas]);
+//           if (kelasResult.rows.length === 0) {
+//             throw new Error("Invalid class ID");
+//           }
+
+//           const addStudentValues = [newUserId, name, jenis_kelamin_id, tanggal_lahir, kelas, alamat];
+//           await client.query(queriesSiswa.addStudent, addStudentValues);
+
+//           await client.query('COMMIT');
+
+//           res.status(201).json({ msg: "Registrasi berhasil" });
+//       } catch (error) {
+//           await client.query('ROLLBACK');
+//           console.error('Terjadi kesalahan saat melakukan register', error);
+//           res.status(500).json({ msg: "Internal Server Error" });
+//       } finally {
+//           client.release();
+//       }
+//   } catch (error) {
+//       console.error('Terjadi kesalahan saat melakukan register', error);
+//       res.status(500).json({ msg: "Internal Server Error" });
+//   }
+// };
+
 // Function Login
 const Login = async (req, res) => {
   try {
@@ -159,7 +254,7 @@ const Login = async (req, res) => {
           maxAge: 24 * 60 * 60 * 1000 // 1 hari
       });
 
-      res.json({ accessToken })
+      res.json({ accessToken, name })
 
       // Simpan access token dalam cookie
       // res.cookie('accessToken', accessToken, {
@@ -295,20 +390,15 @@ const Logout = async (req, res) => {
 //     }
 //   };
 
-// Function menampilkan form login dan register
-const form = (req, res) => {
-    res.render('login/login', {
-        layout : 'layouts/login-layout',
-        title  : 'Login' 
-    })
-}
+
 
 
 module.exports = {
     getUsers,
+    getJenisKelamin,
     getUsersById,
+    getJenisKelamin,
     deleteUsers,
-    form,
     Register,
     Login,
     Logout,

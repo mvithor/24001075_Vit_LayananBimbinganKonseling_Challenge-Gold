@@ -2,6 +2,7 @@ const pool = require('../config/connection')
 const queries = require('../model/siswaModel');
 const moment = require('moment');
 
+// Dapatkan data siswa
 const getStudents = async (req, res) => {
     try {
         const result = await pool.query(queries.getStudents);
@@ -22,45 +23,49 @@ const getStudents = async (req, res) => {
     };
 };
 
-// Dapatkan Data siswa berdasarkan Jenis Kelamin
-const getJenisKelamin = async (req, res) => {
+// Dapatkan jumlah data siswa
+const getStudentsAll = async (req, res) => {
     try {
-        const result = await pool.query('SELECT DISTINCT jenis_kelamin FROM students');
-        const genderOptions = result.rows.map(row => ({ value: row.jenis_kelamin, label: row.jenis_kelamin }));
-        res.json(genderOptions);
+      const result = await pool.query(queries.getStudentsAll);
+      const count = result.rows[0].count;
+      res.json({count})
     } catch (error) {
-        console.error('Error fetching gender options:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Terjadi kesalahan saat mengambil jumlah siswa', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-};
 
+}
 
 // Dapatkan data siswa berdasarkan ID
 const getStudentsById = async (req, res) => {
     try {
-      const id = req.params.id;
-      const result = await pool.query(queries.getStudentsById, [id]);
-      const student = result.rows[0];
-      res.json(student);
-    } catch (error) { 
-      console.error("Terjadi kesalahan saat mendapatkan data siswa berdasarkan ID:", error);
-      res.status(500).json({ msg: "Internal Server Error" });
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            throw new Error('Invalid ID');
+        }
+        const result = await pool.query(queries.getStudentsById, [id]);
+        const student = result.rows[0];
+        res.json(student);
+    } catch (error) {
+        console.error("Terjadi kesalahan saat mendapatkan data siswa berdasarkan ID:", error);
+        res.status(500).json({ msg: "Internal Server Error" });
     }
-   
-  };
+};
+
+
   
 // Function update student
 const updateStudent = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, tanggal_lahir, jenis_kelamin, kelas, alamat } = req.body;
+        const { name, tanggal_lahir, jenis_kelamin_id, kelas_id, alamat } = req.body;
         
         // Lakukan update data siswa
         await pool.query(queries.updateStudent, [
             name,
-            jenis_kelamin,
+            jenis_kelamin_id,
             tanggal_lahir, 
-            kelas, 
+            kelas_id, 
             alamat, 
             id
         ]);
@@ -74,9 +79,12 @@ const updateStudent = async (req, res) => {
 // Hapus data siswa 
 const deleteStudent = async (req, res) => {
     try {
-        const id = req.params.id;
-        const result = await pool.query(queries.deleteStudent, [id]);
-        
+        const id = parseInt (req.params.id);
+        const checkSiswaTerdaftar = await pool.query(queries.getStudentsById, [id]);
+        if (checkSiswaTerdaftar.rows.length === 0) {
+            return res.status(404).json({ msg: "Siswa tidak ditemuka"});
+        };
+        await pool.query(queries.deleteStudent, [id]);
         res.status(200).send("Data siswa berhasil dihapus");
     } catch (error) {
         console.error('Terjadi kesalahan saat menghapus data siswa', error);
@@ -102,7 +110,8 @@ const deleteAllStudent = async (req, res) => {
 
 module.exports = {
     getStudents,
-    getJenisKelamin,
+
+    getStudentsAll,
     getStudentsById,
     deleteStudent,
     deleteAllStudent,
