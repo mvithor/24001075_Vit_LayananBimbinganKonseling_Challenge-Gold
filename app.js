@@ -67,6 +67,7 @@ app.use('/pelanggaran', pelanggaranRoutes);
 app.use('/konseling', konselingRoutes);
 app.use('/auth', loginRoutes);
 app.use('/users', usersRoutes);
+//Routing Pelanggaran
 app.use('/admin', adminPelanggaranRoutes)
 
 // Run Servers
